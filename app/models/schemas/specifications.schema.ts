@@ -1,27 +1,22 @@
 import { Schema } from "mongoose";
+import fileSchema, { IFile } from "~/models/schemas/file.schema";
+import { isObject } from "~/utils/typeValidators";
 
-type Specification = { name: string; icon: string };
+export type ISpecification = { summary: string; icon: IFile };
+export const isISpecification = <T>(item: T) =>
+  isObject(item) && "summary" in item && "icon" in item;
 
-export interface ISpecifications {
-  specifications: Array<Specification>;
-}
-
-const specificationsSchema = new Schema<ISpecifications>(
-  {
-    specifications: [
-      {
-        icon: {
-          type: Number,
-          required: true,
-        },
-        name: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+const specificationsSchema = new Schema<ISpecification>({
+  icon: {
+    type: fileSchema,
+    required: true,
   },
-  { _id: false },
-);
+  summary: {
+    type: String,
+    required: true,
+    maxlength: 50,
+    minlength: 20,
+  },
+});
 
 export default specificationsSchema;

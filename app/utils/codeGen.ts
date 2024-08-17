@@ -2,18 +2,18 @@ type Option = {
   includeAlphaNumeric?: boolean;
 };
 
-const codeGen = (salt: number, options?: Option) => {
-  let otp = "";
+const codeGen = (len: number, options?: Option) => {
+  let code = "";
   const characters = options?.includeAlphaNumeric
     ? "0123456789abcdefghijklmnopqrstuvwxyz"
     : "0123456789";
-  const len = characters.length;
+  const length = characters.length;
 
-  for (let i = 0; i < salt; i++) {
-    otp += characters[Math.floor(Math.random() * len)];
+  for (let i = 0; i < len; i++) {
+    code += characters[Math.floor(Math.random() * length)];
   }
 
-  return otp;
+  return code;
 };
 
 export default codeGen;

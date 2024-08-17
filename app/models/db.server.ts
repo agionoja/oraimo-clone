@@ -38,7 +38,7 @@ export const getAll = async <T>(
       .limitFields()
       .paginate(); // Assuming paginate is a method in AppQueries
 
-    const docs = cb ? await cb(query.mongooseQuery) : await query.mongooseQuery;
+    const docs = cb ? await cb(query.query) : await query.query;
 
     return { key: model.modelName.toLowerCase() + "s", value: docs };
   } catch (error) {

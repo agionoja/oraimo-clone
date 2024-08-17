@@ -1,6 +1,6 @@
 import { Schema, Types } from "mongoose";
 import addressSchema, { IAddress } from "~/models/schemas/address.schema";
-import { IBill } from "~/models/bill.model.server";
+import { IBill } from "~/models/bill.model";
 
 export interface IOder {
   orderNumber: string;

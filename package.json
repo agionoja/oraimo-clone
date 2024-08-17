@@ -16,8 +16,10 @@
     "@remix-run/node": "^2.10.3",
     "@remix-run/react": "^2.10.3",
     "@types/clone-deep": "^4.0.4",
+    "@types/validator": "^13.12.0",
     "bcrypt": "^5.1.1",
     "clone-deep": "^4.0.1",
+    "cloudinary": "^2.4.0",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
@@ -26,9 +28,12 @@
     "mongoose": "^8.5.1",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4",
+    "qs": "^6.13.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tiny-invariant": "^1.3.3"
+    "slugify": "^1.6.6",
+    "tiny-invariant": "^1.3.3",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.10.3",

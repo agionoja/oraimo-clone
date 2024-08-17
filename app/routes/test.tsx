@@ -1,61 +1,75 @@
-import { Form, useActionData } from "@remix-run/react";
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { createUser } from "~/services/user.server";
-import React from "react";
+import * as factory from "~/services/factory";
+import Review from "~/models/review.model";
+
+export async function loader() {
+  const result = await factory.findById("66bd53a785326e6f4ec3d5ae", Review);
+
+  console.log(result);
+
+  return result.error
+    ? json(
+        { users: null, error: result.error },
+        { status: result.error.statusCode },
+      )
+    : json({ users: result.data, error: null });
+}
 
 export async function action({ request }: ActionFunctionArgs) {
-  const res = await createUser(request);
+  const formData = request.formData();
+  // const result = await factory.createOne(formData, Review);
 
-  if ("user" in res) {
-    const user = res.user;
-
-    return json({ user });
-  } else {
-    return json(
-      { message: res.error.message },
-      { status: res.error.statusCode },
-    );
-  }
-}
-
-export default function Test() {
-  const actionData = useActionData<typeof action>();
-  return (
-    <Form method="POST">
-      <label>
-        <span title={"tesing"}>First Name</span>
-        <Input name="firstname" type="text" />
-      </label>
-      <label>
-        <span>Last Name</span>
-        <Input name="lastname" type="text" />
-      </label>
-      <label>
-        <span>Email</span>
-        <Input name="email" type="email" />
-      </label>
-      <label>
-        <span>Password</span>
-        <Input name="password" type="password" />
-      </label>
-      <label>
-        <span>Password Confirmation</span>
-        <Input name="passwordConfirm" type="password" />
-      </label>
-      <button type="submit">Submit</button>
-      {actionData ? (
-        <span className={"text-xs text-red-400"}>
-          {"user" in actionData
-            ? actionData.user.firstname
-            : actionData.message}
-        </span>
-      ) : (
-        ""
-      )}
-    </Form>
+  const review = await Review.findByIdAndUpdate(
+    "66bd53a785326e6f4ec3d5ae",
+    Object.fromEntries(await formData),
   );
+  return json({ review, formData: Object.fromEntries(await formData) });
+
+  // console.log(result);
+  //
+  // return result.error
+  //   ? json(
+  //       { user: null, error: result.error },
+  //       { status: result.error.statusCode },
+  //     )
+  //   : json({ data: result.data, error: null });
 }
 
-function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={"border-2 border-blue-600"} />;
-}
+// export default function Test() {
+//   const actionData = useActionData<typeof action>();
+//   const loaderData = useLoaderData<typeof loader>();
+//
+//   return (
+//     <Form method="POST">
+//       <label>
+//         <span title={"tesing"}>First Name</span>
+//         <Input name="rating" type="number" />
+//       </label>
+//       <label>
+//         <span>Last Name</span>
+//         <Input name="review" type="text" />
+//       </label>
+//       <label>
+//         <span>Email</span>
+//         <Input name="user" type="text" />
+//       </label>
+//       <label>
+//         <span>Password</span>
+//         <Input name="product" type="text" />
+//       </label>
+//       <label>
+//         <span>Password Confirmation</span>
+//         <Input name="passwordConfirm" type="password" />
+//       </label>
+//       <label>
+//         <span>Password Confirmation</span>
+//         <Input name="file" type="file" />
+//       </label>
+//       <button type="submit">Submit</button>
+//     </Form>
+//   );
+// }
+
+// function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+//   return <input {...props} className={"border-2 border-blue-600"} />;
+// }

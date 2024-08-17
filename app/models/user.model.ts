@@ -1,4 +1,11 @@
-import { model, Model, Schema, Types } from "mongoose";
+import {
+  HydratedArraySubdocument,
+  HydratedDocument,
+  model,
+  Model,
+  Schema,
+  Types,
+} from "mongoose";
 import createTimeStamp from "~/utils/createTimeStamp";
 import codeGen from "~/utils/codeGen";
 import { Roles } from "~/utils/enums";
@@ -6,6 +13,7 @@ import { compareHash, hashPassword } from "~/utils/scrypt";
 import addressSchema, { IAddress } from "~/models/schemas/address.schema";
 
 export interface IUser {
+  // _id: Types.ObjectId;
   email: string;
   firstname: string;
   lastname: string;
@@ -14,7 +22,7 @@ export interface IUser {
   cart: string[];
   orders: string;
   coupon: string;
-  addresses: Types.DocumentArray<IAddress>;
+  addresses: Array<IAddress>;
   wishlist: Array<Types.ObjectId>;
   password: string;
   passwordConfirm: string | undefined;
@@ -25,7 +33,12 @@ export interface IUser {
   verificationCodeExpires: Date | undefined;
 }
 
-interface IUserMethods {
+export type AddressHydratedDocument = HydratedDocument<
+  IUser,
+  { addresses: HydratedArraySubdocument<IAddress> }
+>;
+
+export interface IUserMethods {
   passwordChangedAfterJwt: (jwtIat: Date) => boolean;
   comparePassword: (
     plainPassword: string,
@@ -35,9 +48,26 @@ interface IUserMethods {
   generateAndSaveVerificationCode: () => Promise<string>;
 }
 
-type UserModel = Model<IUser, NonNullable<unknown>, IUserMethods>;
+interface UserModel
+  extends Model<
+    IUser,
+    NonNullable<unknown>,
+    IUserMethods,
+    NonNullable<unknown>,
+    AddressHydratedDocument
+  > {}
 
-const userSchema = new Schema<IUser, UserModel, IUserMethods>(
+const userSchema = new Schema<
+  IUser,
+  UserModel,
+  IUserMethods,
+  NonNullable<unknown>,
+  NonNullable<unknown>,
+  NonNullable<unknown>,
+  NonNullable<unknown>,
+  IUser,
+  AddressHydratedDocument
+>(
   {
     firstname: {
       type: String,
@@ -55,6 +85,7 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
     username: {
       type: String,
       unique: true,
+      sparse: true,
     },
     email: {
       type: String,
@@ -101,6 +132,12 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   { timestamps: true },
 );
 
+userSchema.index({
+  firstname: "text",
+  lastname: "text",
+  username: "text",
+});
+
 userSchema.pre<IUser>("save", async function (next) {
   this.password = await hashPassword(this.password);
   this.passwordConfirm = undefined;
@@ -129,7 +166,7 @@ userSchema.methods.generateAndSavePasswordResetCode = async function () {
   this.passwordResetCode = code;
   this.passwordResetCodeExpires = new Date(createTimeStamp({ m: 10 }));
 
-  this.save({ validateBeforeSave: false });
+  await this.save({ validateBeforeSave: false });
   return code;
 };
 
@@ -137,7 +174,7 @@ userSchema.methods.generateAndSaveVerificationCode = async function () {
   const code = codeGen(6, { includeAlphaNumeric: true });
   this.verificationCode = code;
   this.verificationCodeExpires = new Date(createTimeStamp({ m: 10 }));
-  this.save({ validateBeforeSave: false });
+  await this.save({ validateBeforeSave: false });
   return code;
 };
 
